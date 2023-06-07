@@ -214,10 +214,10 @@ class ThermalImage:
         cb_gray = np.tile(cb_gray, 21)
 
         # If the image height happens to be smaller than 255 pixels, then reduce the colour bar accordingly
-        # if self.thermal_np.shape[0] < 255:
-        #     cb_gray = cv.resize(
-        #         cb_gray, (min(21, int(self.thermal_np.shape[1] * 0.05)), int(self.thermal_np.shape[0] * 0.75))
-        #     )
+        if self.thermal_np.shape[0] < 255:
+             cb_gray = cv.resize(
+                 cb_gray, (min(21, int(self.thermal_np.shape[1] * 0.05)), int(self.thermal_np.shape[0] * 0.75))
+             )
 
         cb_color = cv.applyColorMap(cb_gray, cmap) if cmap is not None else cv.cvtColor(cb_gray, cv.COLOR_GRAY2BGR)
 
@@ -905,7 +905,7 @@ class ThermalSeqVideo:
                 line = line.encode("latin-1")
                 output_file.write(line)
             Thread(
-                target=get_thermal_image_from_file, kwargs={"thermal_class": ThermalImage, "thermal_input": outname}
+                target=get_thermal_image_from_file, kwargs={"thermal_class": ThermalImage, "thermal_input": outname, "colormap" :"jet" }
             ).start()
             idx = idx + 1
             if idx % 100000 == 0:
@@ -976,7 +976,7 @@ def get_thermal_image_from_file(thermal_input, thermal_class=ThermalImage, color
             logger.error("Input folder contains neither fff or RJPG files")
 
     elif Path.is_file(inputpath):
-        thermal_obj = CThermal(thermal_input, color_map=colormap)
+        thermal_obj = CThermal(thermal_input, color_map=colormap,camera_manufacturer= "flir")
         path_wo_ext = Path.as_posix(inputpath).replace(inputpath.suffix, "")
         thermal_obj.save_thermal_image(path_wo_ext + ".jpg")
 
